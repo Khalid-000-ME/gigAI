@@ -6,6 +6,38 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.hero-mesh {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+  background-color: hsla(359,85%,61%,1);
+  background-image:
+    radial-gradient(at 40% 20%, hsla(0,100%,74%,1) 0px, transparent 50%),
+    radial-gradient(at 89% 14%, hsla(258,100%,56%,0.81) 0px, transparent 50%),
+    radial-gradient(at 2% 50%, hsla(355,100%,93%,1) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, hsla(340,100%,76%,1) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(273,94%,45%,1) 0px, transparent 50%),
+    radial-gradient(at 79% 99%, hsla(216,66%,26%,1) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, hsla(262,100%,51%,1) 0px, transparent 50%);
+}
+
+.hero-mesh-dark {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+  background-color:hsla(359,85%,61%,1);
+  background-image:
+  radial-gradient(at 88% 10%, hsla(1,0%,100%,1) 0px, transparent 50%),
+  radial-gradient(at 61% 24%, hsla(258,0%,100%,0.81) 0px, transparent 50%),
+  radial-gradient(at 31% 44%, hsla(355,100%,93%,1) 0px, transparent 50%),
+  radial-gradient(at 35% 86%, hsla(281,100%,76%,1) 0px, transparent 50%),
+  radial-gradient(at 7% 65%, hsla(273,94%,45%,1) 0px, transparent 50%),
+  radial-gradient(at 79% 99%, hsla(204,0%,100%,1) 0px, transparent 50%),
+  radial-gradient(at 58% 72%, hsla(261,0%,100%,1) 0px, transparent 50%);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -69,16 +101,4 @@ body {
   body {
     @apply bg-background text-foreground;
   }
-}
-
-.hero-mesh {
-  background-color:hsla(359,85%,61%,1);
-  background-image:
-  radial-gradient(at 40% 20%, hsla(0,100%,74%,1) 0px, transparent 50%),
-  radial-gradient(at 89% 14%, hsla(258,100%,56%,0.81) 0px, transparent 50%),
-  radial-gradient(at 2% 50%, hsla(355,100%,93%,1) 0px, transparent 50%),
-  radial-gradient(at 80% 50%, hsla(340,100%,76%,1) 0px, transparent 50%),
-  radial-gradient(at 0% 100%, hsla(273,94%,45%,1) 0px, transparent 50%),
-  radial-gradient(at 79% 99%, hsla(216,66%,26%,1) 0px, transparent 50%),
-  radial-gradient(at 0% 0%, hsla(262,100%,51%,1) 0px, transparent 50%);
 }
