@@ -1,9 +1,15 @@
 import Image from "next/image";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { Separator } from "@/components/ui/separator";
-import { ProfileValues } from "@/components/ui/profile-values";
+import ProfileValues from "@/components/ui/profile-values";
 
 export default function Home() {
+
+  const dataValues = [
+    {data: "Wallet Address", record: "0xC2e09a2dc61143D20EB4cE6DfB05DB5F39Da13c4", copy: true},
+    {data: "Name", record: "John Doe", copy:false},
+    {data: "City", record: "Banglore", copy:false}
+  ]
 
 
   return (
@@ -23,7 +29,15 @@ export default function Home() {
           />
         </div>
         <div className="flex flex-col justify-center m-4 mb-10 w-[90vw] rounded-lg p-4 relative overflow-hidden shadow-2xl shadow-blue-600">
-          <Separator className="my-4"/>
+          {
+            dataValues.map((value) => {
+              return(  <>
+                <ProfileValues data={value.data} record={value.record} copy={value.copy} />
+                <Separator className="my-4" />
+                </>
+              )
+            })
+          }
         </div>
 
       </main>
