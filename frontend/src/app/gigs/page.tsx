@@ -1,9 +1,18 @@
 import Image from "next/image";
 import { ModeToggle } from "@/components/ui/mode-toggle";
-import { Meteors } from "@/components/ui/meteors";
+import { GigCard } from '@/components/ui/gig-card';
 
 
 export default function Home() {
+
+  const gigs = [
+    {title: "Typescript card", description: "Design a card for our web app", content: "Our company is looking for a card to be made", footer: "buildspace, ontario"},
+    {title: "Typescript card", description: "Design a card for our web app", content: "Our company is looking for a card to be made", footer: "buildspace, ontario"},
+    {title: "Typescript card", description: "Design a card for our web app", content: "Our company is looking for a card to be made", footer: "buildspace, ontario"},
+    {title: "Typescript card", description: "Design a card for our web app", content: "Our company is looking for a card to be made", footer: "buildspace, ontario"},
+  ]
+
+
   return (
     <div className="flex flex-col items-center justify-start h-screen">
       <header className="flex flex-row gap-4 justify-center w-full m-4 border-b-2 border-gray-200">
@@ -12,8 +21,14 @@ export default function Home() {
         </div>
       </header>
       <main className="flex flex-col items-center justify-center w-full">
-        <div className="flex flex-col justify-center items-center m-4 w-10 h-[100vh] rounded-lg p-4 relative overflow-hidden shadow-2xl shadow-blue-600">
-          Hello
+        <div className="grid grid-cols-3 sm:grid cols-2 gap-4 m-10 relative overflow-hidden">
+          {
+            gigs.map((gig) => {
+              return (
+                <GigCard title={gig.title} description={gig.description} content={gig.content} footer={gig.footer} />
+              )
+            })
+          }
         </div>
       </main>
     </div>

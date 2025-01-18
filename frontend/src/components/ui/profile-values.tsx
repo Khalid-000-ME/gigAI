@@ -14,12 +14,14 @@ import {
   
 
 
-export default function ProfileValues(props: any) {
+export default function ProfileValues(
+    {data, record, copy} : {data: string, record: string, copy: boolean}
+) {
 
     const [copied, setCopied] = useState(false);
 
     const copyToClipBoard = () => {
-        const result = navigator.clipboard.writeText(props.record);
+        const result = navigator.clipboard.writeText(record);
         result.then(() => {
             setCopied(true);
         })
@@ -28,40 +30,43 @@ export default function ProfileValues(props: any) {
   
   
     return (
-        <div className="flex flex-row space-x-[50vw]">
-            <div><p>{props.data}:</p></div>
-            { props.copy && (
+        <div className="flex flex-row">
+            <div className='flex flex-col basis-1/2' ><p>{data}:</p></div>
+            { copy && (
 
-            <div className='flex flex-row gap-2'>
-            <Badge variant="outline"><div className="text-ellipsis overflow-hidden max-w-[20vw]"><p>{props.record}</p></div></Badge>
+            <div className='flex flex-col basis-1/2'>
+
+                <div className='flex flex-row gap-2'>
+                <Badge variant="outline"><div className="text-ellipsis overflow-hidden max-w-[20vw]"><p>{record}</p></div></Badge>
+                
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger>
+                        <Button variant="outline" size="icon" onClick={copyToClipBoard}>
+                            <Clipboard className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 invert" />
+                            <span className="sr-only">Copy to clipboard</span>
+                        </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                        { ((copied == true) ? <p>Copied Successfully!</p> : <p>Copy to clipboard</p>) }
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+                </div>
             
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger>
-                    <Button variant="outline" size="icon" onClick={copyToClipBoard}>
-                        <Clipboard className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 " />
-                        <span className="sr-only">Copy to clipboard</span>
-                    </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                    { ((copied == true) ? <p>Copied Successfully!</p> : <p>Copy to clipboard</p>) }
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
             </div>
             
             ) }
 
-            { !props.copy && (
+            { !copy && (
 
-                <div className="text-ellipsis max-w-[20vw]">
-                    <p>{props.record}</p>
+                <div className="flex flex-col basis-1/2 text-ellipsis max-w-[20vw]">
+                    <p>{record}</p>
                 </div>
 
             )
             }
 
-            
         </div>
   )
 }
