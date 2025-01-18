@@ -1,6 +1,6 @@
 import os
 import json
-from fastapi import FastAPI, HTTPException, Depends, Body
+from fastapi import FastAPI, HTTPException, Depends, Body, Query
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,13 +12,13 @@ from datetime import datetime
 from dotenv import load_dotenv
 import subprocess
 from pymongo import MongoClient
-from typing import List
+from typing import List, Optional
 
 
 load_dotenv()
 
 origins = [
-    "http://localhost:3000", 
+    "http://127.0.0.1:3000", 
 ]
 
 app = FastAPI()
@@ -54,6 +54,7 @@ class User(Base):
     role = Column(String)
     skills = Column(JSON)
     mongo_id = Column(String)
+    password = Column(String)
     
 
 def get_db():
@@ -73,16 +74,34 @@ class UserCreate(BaseModel):
     company: str
     role: str
     skills: Skills
+    password: str
     
 
         
 @app.post("/users/", response_model=UserCreate)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = User(name=user.name, email=user.email, resume_uri=user.resume_uri, company=user.company, role=user.role, skills=jsonable_encoder(user.skills))
+    db_user = User(name=user.name, email=user.email, resume_uri=user.resume_uri, company=user.company, role=user.role, skills=jsonable_encoder(user.skills), password=user.password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
+
+@app.get("/users/")
+def get_user(email:str=Query(...), db: Session = Depends(get_db)):
+    user = db.query().filter_by(email=email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+@app.get("/users/login/")
+def login_user(email:str=Query(...), password:str=Query(...), db: Session = Depends(get_db)):
+    user = db.query().filter_by(email=email).first()
+    if not user:
+        return {"error": "Not found"}, 404
+    if user.password == password:
+        return {"message": "Login Scuccessful"}, 200
+    return {"error": "Invalid credentials"}, 400
+    
 
 Base.metadata.create_all(bind=engine)
 

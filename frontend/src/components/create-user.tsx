@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
+import { useToast } from "@/hooks/use-toast"
+
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -18,10 +20,16 @@ import { Input } from "@/components/ui/input"
 
 const formSchema = z.object({
   name: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+    message: "Username must be at least 2 characters long.",
   }),
   email: z.string().trim().email({
     message: "Invalid email address"
+  }),
+  password: z.string().trim().min(6, {
+    message: "Password must be atleast 6 characters long"
+  }),
+  confirmPassword: z.string().trim().min(6, {
+    message: "Password must be atleast 6 characters long"
   }),
   resume_uri: z.string().trim().url({
     message: "Invalid URL",
@@ -35,14 +43,19 @@ const formSchema = z.object({
   skills: z.array(z.string()).min(1, {
     message: "Input your skills"
   })
+}).refine(data => data.password == data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['password', 'confirmPassword']
 })
 
 export function ProfileForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
+    const { toast } = useToast()
+    const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
+      password: "",
       resume_uri: "",
       company: "",
       role: "",
@@ -71,15 +84,18 @@ export function ProfileForm() {
     const profileData = {
         name: values.name,
         email: values.email,
+        password: values.password,
         resume_uri: values.resume_uri,
         company: values.company,
         role: values.role,
-        skills: values.skills,
+        skills: {
+            skills: values.skills
+        },
       }
   
       // Post the data to FastAPI backend
       try {
-        const response = await fetch('http://127.0.0.1:8000/profile/', {
+        const response = await fetch('http://127.0.0.1:8000/users/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -89,18 +105,30 @@ export function ProfileForm() {
   
         if (response.ok) {
           const result = await response.json()
+          toast({
+            title: "Profile created successfully",
+            description: "Happy coding!",
+          })
           console.log('Profile created:', result)
         } else {
+            toast({
+                title: "Error",
+                description: "Failed to submit data",
+              })
           console.error('Failed to submit data')
         }
       } catch (error) {
+        toast({
+            title: "Error",
+            description: "Internal erro occured",
+          })
         console.error('Error occurred:', error)
       }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 my-10">
         <FormField
           control={form.control}
           name="name"
@@ -123,12 +151,46 @@ export function ProfileForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input placeholder="Email" {...field} />
               </FormControl>
               <FormDescription>
                 Your Work email
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+            
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Password" {...field} />
+              </FormControl>
+              <FormDescription>
+                Keep it strong
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+            
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Confirm Password" {...field} />
+              </FormControl>
+              <FormDescription>
+                Make it match your previous password
               </FormDescription>
               <FormMessage />
             </FormItem>
