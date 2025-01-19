@@ -1,5 +1,6 @@
 import os
 import json
+from flask import jsonify
 from fastapi import FastAPI, HTTPException, Depends, Body, Query
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -13,6 +14,11 @@ from dotenv import load_dotenv
 import subprocess
 from pymongo import MongoClient
 from typing import List, Optional
+from sqlalchemy import cast
+from sqlalchemy.dialects.postgresql import JSONB
+import uvicorn
+import fastapi
+import signal
 
 
 load_dotenv()
@@ -47,7 +53,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False)
+    name = Column(String, nullable=False)
     email = Column(String, nullable=False)
     resume_uri = Column(String, nullable=False)
     company = Column(String)
@@ -55,6 +61,16 @@ class User(Base):
     skills = Column(JSON)
     mongo_id = Column(String)
     password = Column(String)
+    
+class Gigs(Base):
+    __tablename__ = "gigs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    description = Column(String)
+    prize_pool = Column(Integer)
+    accepted_num = Column(Integer)
+    tags = Column(JSONB)
     
 
 def get_db():
@@ -76,6 +92,13 @@ class UserCreate(BaseModel):
     skills: Skills
     password: str
     
+class GigCreate(BaseModel):
+    title: str
+    description: str
+    prize_pool: int
+    accepted_num: int
+    tags: Skills
+    
 
         
 @app.post("/users/", response_model=UserCreate)
@@ -87,21 +110,76 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 @app.get("/users/")
-def get_user(email:str=Query(...), db: Session = Depends(get_db)):
-    user = db.query().filter_by(email=email).first()
+def get_user(email: str = Query(None), id: str = Query(None), db: Session = Depends(get_db)):
+    if email:
+        user = db.query(User).filter_by(email=email).first()
+    elif id:
+        user = db.query(User).filter_by(id=int(id)).first()
+    else:
+        raise HTTPException(status_code=400, detail="Either 'email' or 'id' must be provided")
+    
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
 @app.get("/users/login/")
 def login_user(email:str=Query(...), password:str=Query(...), db: Session = Depends(get_db)):
-    user = db.query().filter_by(email=email).first()
+    user = db.query(User).filter_by(email=email).first()
     if not user:
-        return {"error": "Not found"}, 404
+        return JSONResponse(
+            content={"error": "Not found"}, status_code=404
+        )
     if user.password == password:
-        return {"message": "Login Scuccessful"}, 200
-    return {"error": "Invalid credentials"}, 400
+        return JSONResponse(
+            content={"message": "Login successful"}, status_code=200
+        )
+    return JSONResponse(
+            content={"error": "Invalid credentials"}, status_code=400
+        )
+
+@app.post("/gigs/", response_model=GigCreate)
+def create_gig(gig: GigCreate, db: Session = Depends(get_db)):
+    # Check if the record already exists
+    record = (
+        db.query(Gigs)
+        .filter(
+            Gigs.title == gig.title,
+            Gigs.description == gig.description,
+            Gigs.prize_pool == gig.prize_pool,
+            Gigs.accepted_num == gig.accepted_num,
+            Gigs.tags == cast(jsonable_encoder(gig.tags), JSONB),
+        )
+        .first()
+    )
+
+    if record:
+        return JSONResponse(
+            content={"error": "Record already exists."}, status_code=400
+        )
+
+    # Create and add the new gig
+    db_gig = Gigs(
+        title=gig.title,
+        description=gig.description,
+        prize_pool=gig.prize_pool,
+        accepted_num=gig.accepted_num,
+        tags=jsonable_encoder(gig.tags),
+    )
+    db.add(db_gig)
+    db.commit()
+    db.refresh(db_gig)
+    return db_gig
+
+def shutdown():
+    os.kill(os.getpid(), signal.SIGTERM)
+    return fastapi.Response(status_code=200, content='Server shutting down...')
+
+@app.on_event('shutdown')
+def on_shutdown():
+    print('Server shutting down...')
     
+app.add_api_route('/shutdown', shutdown, methods=['GET'])
+
 
 Base.metadata.create_all(bind=engine)
 

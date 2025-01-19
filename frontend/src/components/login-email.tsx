@@ -7,6 +7,8 @@ import { z } from "zod"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
 
+import { useRouter } from 'next/navigation'
+
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -31,6 +33,7 @@ const formSchema = z.object({
 
 export function LoginForm() {
     const { toast } = useToast()
+    const router = useRouter();
     const [remember, setRemember] = useState(false);
     const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,16 +62,21 @@ export function LoginForm() {
       if (remember) {
         // Store user ID in local storage or cookies
         localStorage.setItem('userId', user.id.toString());
+        router.push('/profile');
       } else {
         // Use session storage for non-remember-me sessions
         sessionStorage.setItem('userId', user.id.toString());
+        router.push('/profile')
       }
     } catch (error) {
       console.error('Error during login:', error);
     }
+
   };
 
   return (
+    <div className="space-y-5 m-10">
+      <p className="text-3xl font-bold">Log in</p>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-8">
         <FormField
@@ -111,5 +119,6 @@ export function LoginForm() {
         <Button type="submit">Submit</Button>
       </form>
     </Form>
+    </div>
   )
 }

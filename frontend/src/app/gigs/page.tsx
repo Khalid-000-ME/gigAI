@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { GigCard } from '@/components/ui/gig-card';
+import { Menu } from "@/components/menu";
 
 
 export default function Home() {
@@ -34,6 +35,11 @@ export default function Home() {
           }
         </div>
       </main>
+      <footer className="fixed bottom-0">
+        <div className="flex flex-col mb-10">
+          <Menu />
+        </div>
+      </footer>
     </div>
   );
 }

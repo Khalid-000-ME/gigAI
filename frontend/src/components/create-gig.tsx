@@ -18,87 +18,73 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
+import { Textarea } from "./ui/textarea";
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Username must be at least 2 characters long.",
+  title: z.string().min(2, {
+    message: "Enter a valid title",
   }),
-  email: z.string().trim().email({
-    message: "Invalid email address"
+  description: z.string().trim().min(25, {
+    message: "Description too short"
   }),
-  password: z.string().trim().min(6, {
-    message: "Password must be atleast 6 characters long"
+  prize_pool: z.coerce.number().min(100, {
+    message: "Prize pool must atleast be $100"
   }),
-  confirmPassword: z.string().trim().min(6, {
-    message: "Password must be atleast 6 characters long"
+  accepted_num: z.coerce.number().min(2, {
+    message: "Atleast two winners should be given prizes",
   }),
-  resume_uri: z.string().trim().url({
-    message: "Invalid URL",
-  }),
-  company: z.string().min(1, {
-    message: "Company name cannot be empty",
-  }),
-  role: z.string().min(1, {
-    message: "Input your role",
-  }),
-  skills: z.array(z.string()).min(1, {
+  tags: z.array(z.string()).min(1, {
     message: "Input your skills"
   })
-}).refine(data => data.password == data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['password', 'confirmPassword']
 })
 
-export function ProfileForm() {
+export function GigForm() {
     const router = useRouter()
     const { toast } = useToast()
     const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      resume_uri: "",
-      company: "",
-      role: "",
-      skills: []
+      title: "",
+      description: "",
+      prize_pool: 0,
+      accepted_num: 0,
+      tags: []
     },
   })
+
+
 
   const handleAddSkill = (e: React.FormEvent<HTMLInputElement>, setValue: any, getValues: any) => {
     e.preventDefault()
     const skill = e.currentTarget.value.trim()
-    if (skill && !getValues("skills").includes(skill)) {
-      const skills = [...getValues("skills"), skill]
-      setValue("skills", skills)
+    if (skill && !getValues("tags").includes(skill)) {
+      const skills = [...getValues("tags"), skill]
+      setValue("tags", skills)
       e.currentTarget.value = ""
     }
   }
 
   const handleRemoveSkill = (skill: string, setValue: any, getValues: any) => {
-    const updatedSkills = getValues("skills").filter((item: string) => item !== skill)
-    setValue("skills", updatedSkills)
+    const updatedSkills = getValues("tags").filter((item: string) => item !== skill)
+    setValue("tags", updatedSkills)
   }
 
 
   // 2. Define a submit handler.
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const profileData = {
-        name: values.name,
-        email: values.email,
-        password: values.password,
-        resume_uri: values.resume_uri,
-        company: values.company,
-        role: values.role,
-        skills: {
-            skills: values.skills
+        title: values.title,
+        description: values.description,
+        prize_pool: ""+values.prize_pool,
+        accepted_num: ""+values.accepted_num,
+        tags: {
+            skills: values.tags
         },
       }
-  
+      console.log(profileData)
       // Post the data to FastAPI backend
       try {
-        const response = await fetch('http://127.0.0.1:8000/users/', {
+        const response = await fetch('http://127.0.0.1:8000/gigs/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -129,26 +115,22 @@ export function ProfileForm() {
       }
   }
 
-  const handleLogin = () => {
-    router.push('/login')
-  }
-
   return (
     <div className="m-10 space-y-5 min-w-[50vw]">
-    <p className="text-3xl font-bold">Create an account</p>
+    <p className="text-3xl font-bold">Create a Gig</p>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 my-10">
         <FormField
           control={form.control}
-          name="name"
+          name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Gig Title</FormLabel>
               <FormControl>
-                <Input placeholder="Enter your Name" {...field} />
+                <Input placeholder="Title of the Gig" {...field} />
               </FormControl>
               <FormDescription>
-                This is your public display name.
+                Public display name of the gig.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -157,15 +139,15 @@ export function ProfileForm() {
         />
         <FormField
           control={form.control}
-          name="email"
+          name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Description</FormLabel>
               <FormControl>
-                <Input placeholder="Email" {...field} />
+                <Textarea placeholder="Description of the Gig" {...field}/>
               </FormControl>
               <FormDescription>
-                Your Work email
+                Describe the Gig
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -174,15 +156,15 @@ export function ProfileForm() {
         />
         <FormField
           control={form.control}
-          name="password"
+          name="prize_pool"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Prize Pool in $</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Password" {...field} />
+                <Input type="number" min="0" placeholder="Min Prize Pool" {...field} />
               </FormControl>
               <FormDescription>
-                Keep it strong
+                Keep it high!
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -191,79 +173,27 @@ export function ProfileForm() {
         />
         <FormField
           control={form.control}
-          name="confirmPassword"
+          name="accepted_num"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
+              <FormLabel>Accepted submissions</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Confirm Password" {...field} />
+                <Input type="number" min="0" placeholder="Minimum submissions accepted" {...field} />
               </FormControl>
               <FormDescription>
-                Make it match your previous password
+                The min no. of submissions accepted
               </FormDescription>
               <FormMessage />
             </FormItem>
             
           )}
         />
-        <FormField
-          control={form.control}
-          name="resume_uri"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Resume URL</FormLabel>
-              <FormControl>
-                <Input placeholder="URL for your Resume" {...field} />
-              </FormControl>
-              <FormDescription>
-                Give the URL for your Resume.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-            
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="company"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Company Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Company" {...field} />
-              </FormControl>
-              <FormDescription>
-                Give your company name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-            
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="role"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Role</FormLabel>
-              <FormControl>
-                <Input placeholder="Role in your organization" {...field} />
-              </FormControl>
-              <FormDescription>
-                Role??
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-            
-          )}
-        />
-
         <FormField
         control={form.control}
-        name="skills"
+        name="tags"
         render={({ field }) => (
             <FormItem>
-            <FormLabel>Skills</FormLabel>
+            <FormLabel>Tags</FormLabel>
             <FormControl>
                 <div className="flex flex-col gap-2">
                 {/* Display skills as chips */}
@@ -284,12 +214,12 @@ export function ProfileForm() {
 
                 {/* Input to add skills */}
                 <Input
-                    placeholder="Add a skill"
+                    placeholder="Add skills involved"
                     onKeyDown={(e) => e.key === "Enter" && handleAddSkill(e, form.setValue, form.getValues)}
                 />
                 </div>
             </FormControl>
-            <FormDescription>Press Enter to add a skill.</FormDescription>
+            <FormDescription>This can be AI, Python, Web3, etc.</FormDescription>
             <FormMessage />
             </FormItem>
         )}
@@ -297,8 +227,6 @@ export function ProfileForm() {
 
 
         <Button type="submit">Submit</Button>
-        <p>or</p>
-        <Button onClick={handleLogin} >Login</Button>
       </form>
     </Form>
     </div>

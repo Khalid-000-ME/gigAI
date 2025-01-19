@@ -15,13 +15,13 @@ import {
 
 
 export default function ProfileValues(
-    {data, record, copy} : {data: string, record: string, copy: boolean}
+    {data, record, copy} : {data: string, record: string | number, copy: boolean}
 ) {
 
     const [copied, setCopied] = useState(false);
 
     const copyToClipBoard = () => {
-        const result = navigator.clipboard.writeText(record);
+        const result = navigator.clipboard.writeText(record.toString());
         result.then(() => {
             setCopied(true);
         })
