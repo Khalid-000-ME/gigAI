@@ -78,7 +78,6 @@ export default function Home() {
           Object.entries(dataValues).map(([key, value]) => {
               if (key != "password" && key != "id" && key != "mongo_id") {
                 if (key === "skills") {
-                  console.log(value.skills)
                   return (
                     <>
                     <div className="flex flex-row" key={key}>
@@ -106,7 +105,7 @@ export default function Home() {
 
                 return (
                   <Fragment key={key}>
-                    <ProfileValues data={String(key).charAt(0).toUpperCase() + String(key).slice(1)} record={value} copy={false} />
+                    <ProfileValues data={(String(key).charAt(0).toUpperCase() + String(key).slice(1)).replace("_", " ").replace("uri", "URI")} record={value} copy={false} />
                     <Separator className="my-4" />
                   </Fragment>
             );
