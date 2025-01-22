@@ -2,9 +2,30 @@ import Image from "next/image";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { GigCard } from '@/components/ui/gig-card';
 import { Menu } from "@/components/menu";
+import { useState } from "react";
+
+interface Gig {
+  title: string,
+  description: string,
+  prize_pool: string,
+  accepted_num: string,
+  tags: {
+    skills: string[] 
+  }
+}
 
 
 export default function Home() {
+
+  const [dataValues, setDataValues] = useState<Gig>( {
+    title: "",
+    description: "",
+    prize_pool: "",
+    accepted_num: "",
+    tags: {
+      skills: [""]
+    }
+  });
 
   const gigs = [
     {title: "Typescript card", description: "Design a card for our web app", content: "Our company is looking for a card to be made", footer: "buildspace, ontario"},
