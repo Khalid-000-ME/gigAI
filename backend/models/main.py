@@ -170,6 +170,13 @@ def create_gig(gig: GigCreate, db: Session = Depends(get_db)):
     db.refresh(db_gig)
     return db_gig
 
+
+@app.get("/gigs/")
+def get_gigs(db: Session=Depends(get_db)):
+    response = db.query(Gigs).all()
+    return JSONResponse(jsonable_encoder(response), status_code=200)
+    
+
 def shutdown():
     os.kill(os.getpid(), signal.SIGTERM)
     return fastapi.Response(status_code=200, content='Server shutting down...')

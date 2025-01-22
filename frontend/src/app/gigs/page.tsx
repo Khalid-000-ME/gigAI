@@ -1,10 +1,13 @@
-import Image from "next/image";
+"use client"
+
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { GigCard } from '@/components/ui/gig-card';
 import { Menu } from "@/components/menu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface Gig {
+  id: number,
   title: string,
   description: string,
   prize_pool: string,
@@ -17,7 +20,9 @@ interface Gig {
 
 export default function Home() {
 
-  const [dataValues, setDataValues] = useState<Gig>( {
+  const router = useRouter();
+  const [gigs, setGigs] = useState<Gig[]>( [{
+    id: 0,
     title: "",
     description: "",
     prize_pool: "",
@@ -25,15 +30,23 @@ export default function Home() {
     tags: {
       skills: [""]
     }
-  });
+  }]);
 
-  const gigs = [
-    {title: "Typescript card", description: "Design a card for our web app", content: "Our company is looking for a card to be made", footer: "buildspace, ontario"},
-    {title: "Typescript card", description: "Design a card for our web app", content: "Our company is looking for a card to be made", footer: "buildspace, ontario"},
-    {title: "Typescript card", description: "Design a card for our web app", content: "Our company is looking for a card to be made", footer: "buildspace, ontario"},
-    {title: "Typescript card", description: "Design a card for our web app", content: "Our company is looking for a card to be made", footer: "buildspace, ontario"},
-  ]
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetch("http://127.0.0.1:8000/gigs/")
+      const data = await response.json();
+      setGigs(data)
+      
+    }
+    fetchData();
+  }, [])
 
+  const handleGigClick = (id: number) => {
+    router.push(`/gigs/${id}`)
+  }
+
+  console.log(gigs)
 
   return (
     <div className="flex flex-col items-center justify-start h-screen">
@@ -50,7 +63,9 @@ export default function Home() {
           {
             gigs.map((gig) => {
               return (
-                <GigCard title={gig.title} description={gig.description} content={gig.content} footer={gig.footer} />
+                <div onClick={()=>{handleGigClick(gig.id)}}>
+                  <GigCard title={gig.title} description={gig.description} content={`$${gig.prize_pool}`} footer={`${gig.accepted_num}`} />
+                </div>
               )
             })
           }
