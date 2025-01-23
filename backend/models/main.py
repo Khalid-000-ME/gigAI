@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Enum, ForeignKey, JSON
+from sqlalchemy import create_engine, Time, Date, Column, Integer, String, DateTime, Enum, ForeignKey, JSON
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -66,11 +66,26 @@ class Gigs(Base):
     __tablename__ = "gigs"
     
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, )
     title = Column(String, nullable=False)
     description = Column(String)
     prize_pool = Column(Integer)
     accepted_num = Column(Integer)
     tags = Column(JSONB)
+    
+class Submissions(Base):
+    __tablename__ = "submissions"
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    gig_id = Column(Integer, ForeignKey('gigs.id'), nullable=False)
+    title = Column(String)
+    description = Column(String)
+    submission_url = Column(String)
+    submission_date = Column(Date)
+    submission_time = Column(Time)
+    status = Column(String)
+    
     
 
 def get_db():
@@ -98,6 +113,16 @@ class GigCreate(BaseModel):
     prize_pool: int
     accepted_num: int
     tags: Skills
+    
+class SubmissionCreate(BaseModel):
+    user_id: int
+    gigs_id: int
+    title: str
+    description: str
+    submission_url: str
+    submission_date: str
+    submission_time: str
+    status: str
     
 
         
@@ -169,6 +194,56 @@ def create_gig(gig: GigCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_gig)
     return db_gig
+
+
+@app.get('/submissions/')
+def get_submissions_by_gig_id(gig_id: int, db: Session=Depends(get_db)):
+    data = db.query(Submissions).filter_by(gig_id=gig_id)
+    return JSONResponse(jsonable_encoder(data), status_code=200)
+
+@app.get('/submissions/')
+def get_submissions_by_user_id(user_id: int, db: Session=Depends(get_db)):
+    data = db.query(Submissions).filter_by(gig_id=user_id)
+    return JSONResponse(jsonable_encoder(data), status_code=200)
+
+@app.post('/submissions/', response_model=SubmissionCreate)
+def post_submissions(submission: SubmissionCreate, db: Session=Depends(get_db)):
+    
+    record = (
+        db.query(Submissions)
+        .filter(
+            Submissions.user_id == submission.user_id,
+            Submissions.gig_id == submission.gig_id,
+            Submissions.description == submission.description,
+            Submissions.submission_url == submission.submission_url,
+            Submissions.submission_date == submission.submission_date,
+            Submissions.submission_time == submission.submission_time,
+            Submissions.status == submission.status
+        )
+        .first()
+    )
+
+    if record:
+        return JSONResponse(
+            content={"error": "Record already exists."}, status_code=400
+        )
+    
+    
+    db_submission = Submissions(
+        user_id=submission.user_id,
+        gig_id=submission.gig_id,
+        title=submission.title,
+        description=submission.description,
+        submission_url=submission.submission_url,
+        submission_date=submission.submission_url,
+        submission_time=submission.submission_time,
+        status=submission.status
+    )
+    db.add(submission)
+    db.commit()
+    db.refresh(db_submission)
+    return JSONResponse(db_submission, status_code=200)
+    
 
 
 @app.get("/gigs/")
