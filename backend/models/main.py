@@ -122,7 +122,6 @@ class SubmissionCreate(BaseModel):
     submission_url: str
     submission_date: str
     submission_time: str
-    status: str
     
 
         
@@ -237,7 +236,6 @@ def post_submissions(submission: SubmissionCreate, db: Session=Depends(get_db)):
         submission_url=submission.submission_url,
         submission_date=submission.submission_url,
         submission_time=submission.submission_time,
-        status=submission.status
     )
     db.add(submission)
     db.commit()
