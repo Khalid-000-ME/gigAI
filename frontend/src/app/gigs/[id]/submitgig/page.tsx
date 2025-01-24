@@ -24,7 +24,7 @@ export default function Home() {
         </div>
       </header>
       <main className="flex flex-col items-center justify-center w-full">
-        <div className="flex flex-col gap-4 justify-center items-center m-4 w-[60vw] min-h-[80vh] rounded-lg p-4 relative overflow-hidden shadow-2xl shadow-blue-600">
+        <div className="flex flex-col gap-4 justify-center items-center m-4 w-[60vw] min-h-[50vh] rounded-lg p-4 relative overflow-hidden shadow-2xl shadow-blue-600">
           <SubForm/>
         </div>
       </main>

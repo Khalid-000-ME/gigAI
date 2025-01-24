@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { parseISO, format } from 'date-fns'
+import { parseISO, fromUnixTime } from 'date-fns'
 
 import { useToast } from "@/hooks/use-toast";
 import { useRouter, useParams } from "next/navigation"
@@ -51,6 +51,7 @@ const formSchema = z.object({
 
 export function SubForm() {
     const router = useRouter()
+    const { gig_id } = useParams();
     const { toast } = useToast()
     const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,24 +83,18 @@ export function SubForm() {
     setValue("tags", updatedSkills)
   }
 
+  console.log((new Date()).toString())
 
   // 2. Define a submit handler.
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const profileData = {
         user_id: localStorage.getItem('userId'),
-        gig_id: router.query,
-        title: values.title,
-        description: "",
-        submission_url: "",
-        submission_date: "",
-        submission_time: "",
+        gig_id: gig_id,
         title: values.title,
         description: values.description,
-        prize_pool: ""+values.prize_pool,
-        accepted_num: ""+values.accepted_num,
-        tags: {
-            skills: values.tags
-        },
+        submission_url: values.submission_url,
+        submission_date: parseISO((new Date()).toString()),
+        submission_time: parseISO(fromUnixTime((new Date()).getTime())),
       }
       console.log(profileData)
       // Post the data to FastAPI backend
@@ -137,7 +132,7 @@ export function SubForm() {
 
   return (
     <div className="m-10 space-y-5 min-w-[50vw]">
-    <p className="text-3xl font-bold">Create a Gig</p>
+    <p className="text-3xl font-bold">Submit a Gig</p>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 my-10">
         <FormField
@@ -145,9 +140,9 @@ export function SubForm() {
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Gig Title</FormLabel>
+              <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="Title of the Gig" {...field} />
+                <Input placeholder="Title of the submission" {...field} />
               </FormControl>
               <FormDescription>
                 Public display name of the gig.
@@ -164,10 +159,10 @@ export function SubForm() {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="Description of the Gig" {...field}/>
+                <Textarea placeholder="Description of the submission" {...field}/>
               </FormControl>
               <FormDescription>
-                Describe the Gig
+                Describe the submission
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -176,75 +171,18 @@ export function SubForm() {
         />
         <FormField
           control={form.control}
-          name="prize_pool"
+          name="submission_url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Prize Pool in $</FormLabel>
+              <FormLabel>Submission URL</FormLabel>
               <FormControl>
-                <Input type="number" min="0" placeholder="Min Prize Pool" {...field} />
+                <Input placeholder="URL of the submission" {...field} />
               </FormControl>
-              <FormDescription>
-                Keep it high!
-              </FormDescription>
               <FormMessage />
             </FormItem>
             
           )}
         />
-        <FormField
-          control={form.control}
-          name="accepted_num"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Accepted submissions</FormLabel>
-              <FormControl>
-                <Input type="number" min="0" placeholder="Minimum submissions accepted" {...field} />
-              </FormControl>
-              <FormDescription>
-                The min no. of submissions accepted
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-            
-          )}
-        />
-        <FormField
-        control={form.control}
-        name="tags"
-        render={({ field }) => (
-            <FormItem>
-            <FormLabel>Tags</FormLabel>
-            <FormControl>
-                <div className="flex flex-col gap-2">
-                {/* Display skills as chips */}
-                <div className="flex gap-2 flex-wrap">
-                    {field.value?.map((skill: string, index: number) => (
-                    <div key={index} className="flex items-center bg-black text-white dark:bg-white dark:text-black px-3 py-1 rounded-lg">
-                        {skill}
-                        <button
-                        type="button"
-                        onClick={() => handleRemoveSkill(skill, form.setValue, form.getValues)}
-                        className="ml-2 text-white  dark:text-black text-sm"
-                        >
-                        x
-                        </button>
-                    </div>
-                    ))}
-                </div>
-
-                {/* Input to add skills */}
-                <Input
-                    placeholder="Add skills involved"
-                    onKeyDown={(e) => e.key === "Enter" && handleAddSkill(e, form.setValue, form.getValues)}
-                />
-                </div>
-            </FormControl>
-            <FormDescription>This can be AI, Python, Web3, etc.</FormDescription>
-            <FormMessage />
-            </FormItem>
-        )}
-        />
-
 
         <Button type="submit">Submit</Button>
       </form>
