@@ -7,7 +7,7 @@ import { z } from "zod"
 import { parseISO, format } from 'date-fns'
 
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -38,10 +38,13 @@ const formSchema = z.object({
   submission_url: z.string().trim().min(8, {
     message: "Invalied URL"
   }),
-  submission_date: z.string().date({
-    message: "Invalid submission date"
-  }),
-  submission_time: z.string().time().min(2, {
+  submission_date: z.string().date(
+    "Invalid date string!"),
+  submission_time: z.string().time(
+    {
+      message: "Invalid submission time"
+    }
+  ).min(2, {
     message: "Submission time must be in 24-hour format",
   })
 })
@@ -52,11 +55,13 @@ export function SubForm() {
     const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      user_id: 0,
+      gig_id: 0,
       title: "",
       description: "",
-      prize_pool: 0,
-      accepted_num: 0,
-      tags: []
+      submission_url: "",
+      submission_date: "",
+      submission_time: "",
     },
   })
 
@@ -81,6 +86,13 @@ export function SubForm() {
   // 2. Define a submit handler.
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const profileData = {
+        user_id: localStorage.getItem('userId'),
+        gig_id: router.query,
+        title: values.title,
+        description: "",
+        submission_url: "",
+        submission_date: "",
+        submission_time: "",
         title: values.title,
         description: values.description,
         prize_pool: ""+values.prize_pool,
