@@ -95,10 +95,10 @@ export function GigForm() {
         if (response.ok) {
           const result = await response.json()
           toast({
-            title: "Profile created successfully",
+            title: "Gig created successfully",
             description: "Happy coding!",
           })
-          console.log('Profile created:', result)
+          console.log('Gig created:', result)
         } else {
             toast({
                 title: "Error",

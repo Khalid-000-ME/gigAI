@@ -116,7 +116,7 @@ class GigCreate(BaseModel):
     
 class SubmissionCreate(BaseModel):
     user_id: int
-    gigs_id: int
+    gig_id: int
     title: str
     description: str
     submission_url: str
@@ -217,7 +217,7 @@ def post_submissions(submission: SubmissionCreate, db: Session=Depends(get_db)):
             Submissions.submission_url == submission.submission_url,
             Submissions.submission_date == submission.submission_date,
             Submissions.submission_time == submission.submission_time,
-            Submissions.status == submission.status
+            Submissions.status == "In progress"
         )
         .first()
     )
@@ -234,13 +234,14 @@ def post_submissions(submission: SubmissionCreate, db: Session=Depends(get_db)):
         title=submission.title,
         description=submission.description,
         submission_url=submission.submission_url,
-        submission_date=submission.submission_url,
+        submission_date=submission.submission_date,
         submission_time=submission.submission_time,
+        status="In progress"
     )
-    db.add(submission)
+    db.add(db_submission)
     db.commit()
     db.refresh(db_submission)
-    return JSONResponse(db_submission, status_code=200)
+    return JSONResponse(jsonable_encoder({"message": db_submission}), status_code=200)
     
 
 
