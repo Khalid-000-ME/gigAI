@@ -27,7 +27,7 @@ const formSchema = z.object({
     message: "Invalid email address"
   }),
   password: z.string().trim().min(6, {
-    message: "Password must be atleast 6 characters long"
+    message: "Invalid password"
   })
 })
 
@@ -105,7 +105,7 @@ export function LoginForm() {
                 <Input type="password" placeholder="Password" {...field} />
               </FormControl>
               <FormDescription>
-                Keep it strong
+                Your Strong password
               </FormDescription>
               <FormMessage />
             </FormItem>

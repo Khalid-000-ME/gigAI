@@ -59,11 +59,11 @@ export default function Home() {
         </div>
       </header>
       <main className="flex flex-col items-center justify-center w-full">
-        <div className="grid grid-cols-3 sm:grid cols-2 gap-4 m-10 relative overflow-hidden">
+        <div className="grid grid-cols-5 sm:grid cols-3 gap-4 m-10 relative overflow-hidden">
           {
             gigs.map((gig) => {
               return (
-                <div onClick={()=>{handleGigClick(gig.id)}}>
+                <div onClick={()=>{handleGigClick(gig.id)}} className="text-ellipsis max-h-[30vw]">
                   <GigCard title={gig.title} description={gig.description} content={`$${gig.prize_pool}`} footer={`${gig.accepted_num}`} />
                 </div>
               )

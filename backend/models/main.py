@@ -66,7 +66,7 @@ class Gigs(Base):
     __tablename__ = "gigs"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, )
+    user_id = Column(Integer)
     title = Column(String, nullable=False)
     description = Column(String)
     prize_pool = Column(Integer)
@@ -265,5 +265,4 @@ app.add_api_route('/shutdown', shutdown, methods=['GET'])
 Base.metadata.create_all(bind=engine)
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
