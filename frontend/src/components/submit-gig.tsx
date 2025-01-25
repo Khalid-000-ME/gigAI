@@ -23,12 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "./ui/textarea";
 
 const formSchema = z.object({
-  user_id: z.coerce.number().min(0, {
-    message: "Enter a valid User ID"
-  }),
-  gig_id: z.coerce.number().min(0, {
-    message: "Enter a valid GIG ID"
-  }),
+  user_id: z.coerce.number().optional(),
+  gig_id: z.coerce.number().optional(),
   title: z.string().min(2, {
     message: "Enter a valid title",
   }),
@@ -38,22 +34,13 @@ const formSchema = z.object({
   submission_url: z.string().trim().min(8, {
     message: "Invalied URL"
   }),
-  submission_date: z.string().min(10, 
-    {
-      message: "Invalid submission time"
-    }),
-  submission_time: z.string().min(8,
-    {
-      message: "Invalid submission time"
-    }
-  ).min(2, {
-    message: "Submission time must be in 24-hour format",
-  }),
+  submission_date: z.string().optional(),
+  submission_time: z.string().optional(),
 })
 
 export function SubForm() {
     const router = useRouter()
-    const { gig_id } = useParams();
+    const { id } = useParams() as { id: string };
     const { toast } = useToast()
     const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,18 +56,18 @@ export function SubForm() {
   })
 
 
-  console.log((new Date()).toString())
+  console.log(id)
 
   // 2. Define a submit handler.
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const profileData = {
-        user_id: localStorage.getItem('userId'),
-        gig_id: (gig_id || 0),
+        user_id: parseInt(localStorage.getItem('userId') || '0'),
+        gig_id: parseInt((id) || '0'),
         title: values.title,
         description: values.description,
         submission_url: values.submission_url,
-        submission_date: "25-MAR-2025",
-        submission_time: "00:07:59",
+        submission_date: new Date().toISOString().split("T")[0],
+        submission_time: new Date().toTimeString().split(" ")[0],
       }
       console.log(profileData)
       // Post the data to FastAPI backend
@@ -96,10 +83,10 @@ export function SubForm() {
         if (response.ok) {
           const result = await response.json()
           toast({
-            title: "Profile created successfully",
+            title: "Gig submitted successfully",
             description: "Happy coding!",
           })
-          console.log('Profile created:', result)
+          console.log('Gig submitted:', result)
         } else {
             toast({
                 title: "Error",
