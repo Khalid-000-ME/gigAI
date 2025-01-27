@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
@@ -18,7 +17,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -52,7 +50,6 @@ const formSchema = z.object({
 
 export function ProfileForm() {
     const router = useRouter()
-    const { toast } = useToast()
     const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -108,23 +105,11 @@ export function ProfileForm() {
   
         if (response.ok) {
           const result = await response.json()
-          toast({
-            title: "Profile created successfully",
-            description: "Happy coding!",
-          })
           console.log('Profile created:', result)
         } else {
-            toast({
-                title: "Error",
-                description: "Failed to submit data",
-              })
           console.error('Failed to submit data')
         }
       } catch (error) {
-        toast({
-            title: "Error",
-            description: "Internal erro occured",
-          })
         console.error('Error occurred:', error)
       }
   }

@@ -6,7 +6,9 @@ import { Separator } from "@/components/ui/separator";
 import ProfileValues from "@/components/ui/profile-values";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+
 
 export default function Home() {
 

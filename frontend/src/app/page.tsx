@@ -5,7 +5,6 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import { Meteors } from "@/components/ui/meteors";
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
-import { Menu } from "@/components/menu";
 
 export default function Home() {
 

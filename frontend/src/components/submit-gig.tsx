@@ -3,12 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-
-import { parseISO, fromUnixTime } from 'date-fns'
-
-import { useToast } from "@/hooks/use-toast";
 import { useRouter, useParams } from "next/navigation"
-
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -41,7 +36,6 @@ const formSchema = z.object({
 export function SubForm() {
     const router = useRouter()
     const { id } = useParams() as { id: string };
-    const { toast } = useToast()
     const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -82,23 +76,11 @@ export function SubForm() {
   
         if (response.ok) {
           const result = await response.json()
-          toast({
-            title: "Gig submitted successfully",
-            description: "Happy coding!",
-          })
           console.log('Gig submitted:', result)
         } else {
-            toast({
-                title: "Error",
-                description: "Failed to submit data",
-              })
           console.error('Failed to submit data')
         }
       } catch (error) {
-        toast({
-            title: "Error",
-            description: "Internal erro occured",
-          })
         console.error('Error occurred:', error)
       }
   }

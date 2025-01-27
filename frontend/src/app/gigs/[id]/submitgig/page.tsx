@@ -1,8 +1,5 @@
 import Image from "next/image";
 import { ModeToggle } from "@/components/ui/mode-toggle";
-import { Meteors } from "@/components/ui/meteors";
-import { Button } from "@/components/ui/button";
-import Link from 'next/link';
 import { SubForm } from "@/components/submit-gig";
 
 

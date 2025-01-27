@@ -248,6 +248,13 @@ def post_submissions(submission: SubmissionCreate, db: Session=Depends(get_db)):
 @app.get("/gigs/")
 def get_gigs(db: Session=Depends(get_db)):
     response = db.query(Gigs).all()
+    print("test")
+    return JSONResponse(jsonable_encoder(response), status_code=200)
+
+@app.get("/gigs/")
+def get_gigs_by_id(id: str,db: Session=Depends(get_db)):
+    response = db.query(Gigs).filter_by(id=int(id)).first()
+    
     return JSONResponse(jsonable_encoder(response), status_code=200)
     
 

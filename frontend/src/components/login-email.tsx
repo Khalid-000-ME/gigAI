@@ -3,12 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-
-import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
-
 import { useRouter } from 'next/navigation'
-
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -32,7 +28,6 @@ const formSchema = z.object({
 })
 
 export function LoginForm() {
-    const { toast } = useToast()
     const router = useRouter();
     const [remember, setRemember] = useState(false);
     const form = useForm<z.infer<typeof formSchema>>({
