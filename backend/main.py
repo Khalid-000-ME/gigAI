@@ -19,6 +19,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 import uvicorn
 import fastapi
 import signal
+import sectional_analysis from "../ai/sentiment.py"
 
 
 load_dotenv()
