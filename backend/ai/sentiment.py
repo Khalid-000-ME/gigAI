@@ -3,18 +3,44 @@ import spacy
 import matplotlib.pyplot as plt
 from collections import Counter
 from textblob import TextBlob
+from io import BytesIO
+import requests
 
 # Load Spacy NLP Model
 nlp = spacy.load("en_core_web_sm")
 
-# Function to Extract Text from Resume
-def extract_text_from_pdf(pdf_path):
-    text = ""
-    with pdfplumber.open(pdf_path) as pdf:
-        for page in pdf.pages:
-            text += page.extract_text() + "\n"
-    return text
+# Convert Google Drive URL to direct download link
+def get_direct_gdrive_link(drive_url):
+    if "drive.google.com" in drive_url:
+        file_id = drive_url.split("/d/")[1].split("/")[0]
+        return f"https://drive.google.com/uc?export=download&id={file_id}"
+    return drive_url
 
+# Function to Extract Text from PDF (handles Google Drive links)
+def extract_text_from_pdf(pdf_url):
+    pdf_url = get_direct_gdrive_link(pdf_url)  # Convert if it's a Google Drive link
+
+    response = requests.get(pdf_url)
+    if response.status_code != 200:
+        raise Exception(f"Failed to download PDF. HTTP Status Code: {response.status_code}")
+
+    content_type = response.headers.get("Content-Type", "")
+    
+    # Allow PDFs even if Google Drive returns "application/octet-stream"
+    if "pdf" not in content_type and content_type != "application/octet-stream":
+        raise Exception(f"Invalid content type: {content_type}. The URL might not point to a valid PDF.")
+
+    text = ""
+    try:
+        with pdfplumber.open(BytesIO(response.content)) as pdf:
+            for page in pdf.pages:
+                extracted_text = page.extract_text()
+                if extracted_text:
+                    text += extracted_text + "\n"
+    except Exception as e:
+        raise Exception(f"Error processing PDF: {e}")
+
+    return text
 # Function to Analyze Resume
 def analyze_resume(pdf_path):
     text = extract_text_from_pdf(pdf_path)
@@ -41,9 +67,9 @@ def analyze_resume(pdf_path):
 def sectional_analysis(pdf_path):
     doc = nlp(extract_text_from_pdf(pdf_path))
     section_keywords = {
-        "Introduction": ["motivated", "passionate", "enthusiastic"],
-        "Experience": ["worked", "developed", "built", "company", "organization"],
-        "Skills": ["skills", "expertise", "knowledge", "experience in"],
+        "introduction": ["motivated", "passionate", "enthusiastic"],
+        "experience": ["worked", "developed", "built", "company", "organization"],
+        "skills": ["skills", "expertise", "knowledge", "experience in"],
     }
 
     # Initialize detected sections
@@ -57,17 +83,19 @@ def sectional_analysis(pdf_path):
                 detected_sections[section] += sent.text + " "
 
     # Perform sentiment analysis on detected sections
+    response = []
+    
     for section, content in detected_sections.items():
         if content.strip():
             sentiment = TextBlob(content).sentiment
-            print(f"Section: {section}")
-            print(f"Content: {content}")
-            print(f"Sentiment: {sentiment}\n")
+            response.append({section: sentiment})
+            
+    return response
     
 
 
 # Example Usage
-resume_path = "KHALID_M_resumé.pdf"  # Provide a sample resume PDF path
+resume_path = ""
 result = analyze_resume(resume_path)
 sectional_analysis(resume_path)
 print(result)
